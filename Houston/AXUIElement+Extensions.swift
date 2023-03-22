@@ -6,15 +6,29 @@ extension AXUIElement {
         }
     }
     
-    func attributeNames() -> [String] {
-        var value: CFArray?
-        let result = AXUIElementCopyAttributeNames(self, &value)
-        if result != .success || value == nil {
-            return []
+    func windowId() -> CGWindowID? {
+        var windowId = CGWindowID(0)
+        let error = _AXUIElementGetWindow(self, &windowId)
+        if error == .success {
+            return windowId
+        } else {
+            return nil
         }
-        return value as! [String]
     }
 
+    static func getElement(pid: pid_t, position: CGPoint) -> AXUIElement? {
+        let appElement = AXUIElementCreateApplication(pid)
+        var element: AXUIElement?
+        let error = AXUIElementCopyElementAtPosition(appElement, Float(position.x), Float(position.y), &element)
+        if error == .success {
+            return element
+        } else {
+            return nil
+        }
+    }
+}
+
+extension AXUIElement {
     func children() -> [AXUIElement] {
         return getValue(attribute: NSAccessibility.Attribute.children) as? [AXUIElement] ?? []
     }
@@ -31,17 +45,18 @@ extension AXUIElement {
     func windows() -> [AXUIElement] {
         return getValue(attribute: NSAccessibility.Attribute.windows) as? [AXUIElement] ?? []
     }
-    
-    func windowId() -> CGWindowID? {
-        var windowId = CGWindowID(0)
-        let error = _AXUIElementGetWindow(self, &windowId)
-        if error == .success {
-            return windowId
-        } else {
-            return nil
-        }
-    }
+}
 
+extension AXUIElement {
+    func attributeNames() -> [String] {
+        var value: CFArray?
+        let result = AXUIElementCopyAttributeNames(self, &value)
+        if result != .success || value == nil {
+            return []
+        }
+        return value as! [String]
+    }
+    
     func getValue(attribute: NSAccessibility.Attribute) -> AnyObject? {
         return getValue(attributeName: attribute.rawValue)
     }
@@ -63,16 +78,5 @@ extension AXUIElement {
     func setValue(attributeName: String, _ value: AnyObject) -> Bool {
         let error = AXUIElementSetAttributeValue(self, attributeName as CFString, value)
         return error == .success
-    }
-
-    static func getElement(pid: pid_t, position: CGPoint) -> AXUIElement? {
-        let appElement = AXUIElementCreateApplication(pid)
-        var element: AXUIElement?
-        let error = AXUIElementCopyElementAtPosition(appElement, Float(position.x), Float(position.y), &element)
-        if error == .success {
-            return element
-        } else {
-            return nil
-        }
     }
 }
