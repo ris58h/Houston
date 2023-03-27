@@ -34,12 +34,12 @@ class SwipeManager {
     }
 
     static func start() {
-        debugPrint("SwipeManager start")
         //TODO: feature switch
         if eventTap != nil {
             debugPrint("SwipeManager is already started")
             return
         }
+        debugPrint("SwipeManager start")
         eventTap = CGEvent.tapCreate(
             tap: .cghidEventTap,
             place: .headInsertEventTap,

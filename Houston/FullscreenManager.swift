@@ -6,10 +6,17 @@ class FullscreenManager {
     private static let maxAttempts = 2
     private static let attemptDelay = 0.5
     
+    private static var started = false
+    
     static func start() {
-        debugPrint("FullscreenManager start")
         //TODO: feature switch
+        if started {
+            debugPrint("FullscreenManager is already started")
+            return
+        }
+        debugPrint("FullscreenManager start")
         NSWorkspace.shared.notificationCenter.addObserver(FullscreenManager.self, selector: #selector(FullscreenManager.activeSpaceChanged), name: NSWorkspace.activeSpaceDidChangeNotification, object: nil)
+        started = true
     }
     
     @objc private static func activeSpaceChanged() {
